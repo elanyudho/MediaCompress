@@ -16,6 +16,14 @@ android {
             minifyEnabled false
         }
     }
+
+    publishing {
+        singleVariant("release") {
+            // if you don't want sources/javadoc, remove these lines
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
 
 dependencies {
@@ -38,7 +46,7 @@ afterEvaluate {
                 from components.release
                 groupId = "com.github.Kecilin-Team"
                 artifactId = "Android-Kecilin-Compressor"
-                version = 'v1.0.0-beta4'
+                version = 'v1.0.0-beta5'
             }
         }
     }

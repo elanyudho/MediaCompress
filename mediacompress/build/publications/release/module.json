@@ -1,9 +1,9 @@
 {
   "formatVersion": "1.1",
   "component": {
-    "group": "id.kecilin.mediacompress",
-    "module": "MediaCompress",
-    "version": "1.0.0",
+    "group": "com.github.Kecilin-Team",
+    "module": "Android-Kecilin-Compressor",
+    "version": "v1.0.0-beta5",
     "attributes": {
       "org.gradle.status": "release"
     }
@@ -24,13 +24,13 @@
       },
       "files": [
         {
-          "name": "MediaCompress-1.0.0.aar",
-          "url": "MediaCompress-1.0.0.aar",
-          "size": 77402,
-          "sha512": "648b32d7909db3b35d36dbd64ab42c781da504eb0d09c746a817eeb7225f24e281958c4e83f3e21bf0bb9594d44ce5775bd788881f6fa3947d3deee864088c75",
-          "sha256": "37ad5c2bd50d2e63ff920e2540aa8539ee7e441b4c39a91d4d3108d46dc2ff0c",
-          "sha1": "a3801c2ca5b8efb7802745e8c58cdcfa945a3b2f",
-          "md5": "3e67f4cec26658c7207fe360d156e44d"
+          "name": "Android-Kecilin-Compressor-v1.0.0-beta5.aar",
+          "url": "Android-Kecilin-Compressor-v1.0.0-beta5.aar",
+          "size": 77830,
+          "sha512": "99f41e1e19878b2a00b34396100dab4c547ea36227fe72c9e003e6e86831e12a4562fb67608812fc2901e83efe98692c61093975413b2c3c46b52fe7581d7965",
+          "sha256": "f3af3cb7dedfd56fcda21e33a9c2fae603edf21c3df90ee3b6b5089ea6622cd1",
+          "sha1": "44779c30a5e674900adbcfd30f90f39bed501f22",
+          "md5": "d686cf2e1937ee189e34aebaebafe1be"
         }
       ]
     },
@@ -81,13 +81,13 @@
       ],
       "files": [
         {
-          "name": "MediaCompress-1.0.0.aar",
-          "url": "MediaCompress-1.0.0.aar",
-          "size": 77402,
-          "sha512": "648b32d7909db3b35d36dbd64ab42c781da504eb0d09c746a817eeb7225f24e281958c4e83f3e21bf0bb9594d44ce5775bd788881f6fa3947d3deee864088c75",
-          "sha256": "37ad5c2bd50d2e63ff920e2540aa8539ee7e441b4c39a91d4d3108d46dc2ff0c",
-          "sha1": "a3801c2ca5b8efb7802745e8c58cdcfa945a3b2f",
-          "md5": "3e67f4cec26658c7207fe360d156e44d"
+          "name": "Android-Kecilin-Compressor-v1.0.0-beta5.aar",
+          "url": "Android-Kecilin-Compressor-v1.0.0-beta5.aar",
+          "size": 77830,
+          "sha512": "99f41e1e19878b2a00b34396100dab4c547ea36227fe72c9e003e6e86831e12a4562fb67608812fc2901e83efe98692c61093975413b2c3c46b52fe7581d7965",
+          "sha256": "f3af3cb7dedfd56fcda21e33a9c2fae603edf21c3df90ee3b6b5089ea6622cd1",
+          "sha1": "44779c30a5e674900adbcfd30f90f39bed501f22",
+          "md5": "d686cf2e1937ee189e34aebaebafe1be"
         }
       ]
     }
