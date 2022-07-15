@@ -36,9 +36,9 @@ afterEvaluate {
         publications {
             release(MavenPublication) {
                 from components.release
-                groupId = "id.kecilin.mediacompress"
-                artifactId = "MediaCompress"
-                version = '1.0.0'
+                groupId = "com.github.Kecilin-Team"
+                artifactId = "Android-Kecilin-Compressor"
+                version = 'v1.0.0-beta4'
             }
         }
     }
