@@ -1,6 +1,6 @@
 ## Get Started
 
-### Step 1.
+## Step 1.
 
 Add token to gradle.properties
 
