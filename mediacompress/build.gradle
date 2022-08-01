@@ -44,9 +44,9 @@ afterEvaluate {
         publications {
             release(MavenPublication) {
                 from components.release
-                groupId = "com.github.Kecilin-Team"
+                groupId = "com.github.ChirikuAlii"
                 artifactId = "Android-Kecilin-Compressor"
-                version = 'v1.0.0-beta7'
+                version = 'v1.0.0-beta9'
             }
         }
     }
