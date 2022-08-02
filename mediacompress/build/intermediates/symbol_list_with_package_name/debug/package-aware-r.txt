@@ -1,2 +1,2 @@
-id.kecilin.mediacompress.videocompress
+id.kecilin.mediacompress
 string app_name

@@ -1,2 +1,0 @@
-id.kecilin.mediacompress
-string app_name

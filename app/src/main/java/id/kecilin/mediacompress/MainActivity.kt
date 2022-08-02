@@ -3,6 +3,7 @@ package id.kecilin.mediacompress
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import id.kecilin.mediacompress.image.ImageCompressActivity
 import id.kecilin.mediacompress.video.VideoCompressActivity
 import id.kecilin.mediacompress.videocompress.R
 import id.kecilin.mediacompress.videocompress.databinding.ActivityMainBinding
@@ -20,7 +21,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnImageCompress.setOnClickListener {
-
+            startActivity(Intent(this,ImageCompressActivity::class.java))
         }
     }
 }
