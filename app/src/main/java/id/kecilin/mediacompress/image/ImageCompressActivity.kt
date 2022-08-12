@@ -5,6 +5,8 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -96,7 +98,8 @@ class ImageCompressActivity : AppCompatActivity() {
 
             val folderName = path ?: Environment.DIRECTORY_PICTURES
             try{
-                saveVideoInExternal(this, videoFileName ="${System.currentTimeMillis()}-${fileOri.name}", videoFile = File(path) , folderName = folderName)
+                saveVideoInExternal(this, videoFileName ="${System.currentTimeMillis()}-${fileOri.name}", videoFile = File(path) , folderName = folderName, uri = dataUriCompress)
+
             }catch (e:Exception){
 
             }
@@ -168,13 +171,20 @@ class ImageCompressActivity : AppCompatActivity() {
         return File(context.filesDir, videoFileName)
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
+
     private fun saveVideoInExternal(
         context: Context,
         videoFileName: String,
         folderName: String,
-        videoFile: File
+        videoFile: File,
+        uri:Uri?
     ): File? {
+
+        val parcelFileDescriptor = uri?.let { contentResolver.openFileDescriptor(it,"r") }
+        val fileDescriptor = parcelFileDescriptor?.fileDescriptor
+
+
+        folderName
         val values = ContentValues().apply {
 
             put(
@@ -182,38 +192,21 @@ class ImageCompressActivity : AppCompatActivity() {
                 videoFileName
             )
             put(MediaStore.Images.Media.MIME_TYPE, "image/*")
-            put(MediaStore.Images.Media.RELATIVE_PATH, folderName)
-            put(MediaStore.Images.Media.IS_PENDING, 1)
+            put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
         }
 
-        val collection =
-            MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
 
-        val fileUri = context.contentResolver.insert(collection, values)
+        val collection = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY) ?: MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 
-        fileUri?.let {
-            context.contentResolver.openFileDescriptor(fileUri, "rw")
-                .use { descriptor ->
-                    descriptor?.let {
-                        FileOutputStream(descriptor.fileDescriptor).use { out ->
-                            FileInputStream(videoFile).use { inputStream ->
-                                val buf = ByteArray(4096)
-                                while (true) {
-                                    val sz = inputStream.read(buf)
-                                    if (sz <= 0) break
-                                    out.write(buf, 0, sz)
-                                }
-                            }
-                        }
-                    }
-                }
 
-            values.clear()
-            values.put(MediaStore.Video.Media.IS_PENDING, 0)
-            context.contentResolver.update(fileUri, values, null, null)
+        contentResolver.insert(collection,values)?.also { uri ->
+            contentResolver.openOutputStream(uri).use { outputStream ->
 
-            return File(getMediaPath(context, fileUri))
+                val  inputStream =FileInputStream(fileDescriptor)
+                outputStream?.write(inputStream.readBytes())
+            }
         }
+
         return null
     }
 
@@ -228,7 +221,7 @@ class ImageCompressActivity : AppCompatActivity() {
         try {
             cursor = resolver.query(uri, projection, null, null, null)
             return if (cursor != null) {
-                val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
+                val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
                 cursor.moveToFirst()
                 cursor.getString(columnIndex)
 
