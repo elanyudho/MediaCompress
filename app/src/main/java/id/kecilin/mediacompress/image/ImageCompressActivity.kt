@@ -12,6 +12,8 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.view.View
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -42,8 +44,12 @@ class ImageCompressActivity : AppCompatActivity() {
     private val registerPickImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == Activity.RESULT_OK) {
             //mViewmodel.doSetEmptyLayout()
+            try {
+                handleResult(it.data)
 
-            handleResult(it.data)
+            }catch (e:Exception){
+
+            }
         }
     }
 
@@ -62,34 +68,17 @@ class ImageCompressActivity : AppCompatActivity() {
         dataUriOri = data?.data
         val fileOri =FileUtilss.from(this,dataUriOri)
 
-        GlobalScope.launch(Dispatchers.IO){
 
-            val compressFile = Compressor.compress(this@ImageCompressActivity, fileOri)
+        binding.btnCompress.visibility = View.VISIBLE
 
-            dataUriCompress =compressFile?.toUri()
-            sizeCompress = getReadableFileSize(compressFile?.length() ?: 0L)
-            sizeOri = getReadableFileSize(fileOri.length() ?: 0L)
+        sizeOri = getReadableFileSize(fileOri.length() ?: 0L)
 
-
-            //save
+        binding.tvOriginalSize.text = "Original Size : ${sizeOri}"
 
 
-            withContext(Dispatchers.Main){
-                saveImage(fileOri,dataUriCompress)
-
-                binding.tvCompressedSize.text = "Compressed Size : ${sizeCompress}"
-                binding.tvOriginalSize.text = "Original Size : ${sizeOri}"
-
-                Glide.with(this@ImageCompressActivity)
-                    .load(dataUriOri)
-                    .into(binding.ivOriginal)
-
-                Glide.with(this@ImageCompressActivity)
-                    .load(dataUriCompress)
-                    .into(binding.ivCompress)
-            }
-
-        }
+        Glide.with(this@ImageCompressActivity)
+            .load(dataUriOri)
+            .into(binding.ivOriginal)
 
     }
 
@@ -100,6 +89,7 @@ class ImageCompressActivity : AppCompatActivity() {
             try{
                 saveVideoInExternal(this, videoFileName ="${System.currentTimeMillis()}-${fileOri.name}", videoFile = File(path) , folderName = folderName, uri = dataUriCompress)
 
+                Toast.makeText(this, "Saved in /Pictures", Toast.LENGTH_SHORT).show()
             }catch (e:Exception){
 
             }
@@ -127,6 +117,7 @@ class ImageCompressActivity : AppCompatActivity() {
                 fos.write(inputData)
                 fos.close()
 
+                Toast.makeText(this, "Saved in /Pictures/Kecilin", Toast.LENGTH_SHORT).show()
             } catch (e: IOException) {
                 e.printStackTrace()
             }
@@ -141,6 +132,36 @@ class ImageCompressActivity : AppCompatActivity() {
 
         binding.btnPickImage.setOnClickListener {
             doTakePhotoFromGallery()
+        }
+
+        binding.btnCompress.setOnClickListener {
+
+            val fileOri =FileUtilss.from(this,dataUriOri)
+
+            GlobalScope.launch(Dispatchers.IO){
+
+                val compressFile = Compressor.compress(this@ImageCompressActivity, fileOri)
+
+                dataUriCompress =compressFile?.toUri()
+                sizeCompress = getReadableFileSize(compressFile?.length() ?: 0L)
+
+
+
+                //save
+
+
+                withContext(Dispatchers.Main){
+                    saveImage(fileOri,dataUriCompress)
+
+                    binding.tvCompressedSize.text = "Compressed Size : ${sizeCompress}"
+
+                    Glide.with(this@ImageCompressActivity)
+                        .load(dataUriCompress)
+                        .into(binding.ivCompress)
+                }
+
+            }
+
         }
     }
 
