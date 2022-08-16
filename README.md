@@ -95,3 +95,22 @@ VideoCompressor.start(
    }
 )
 ```
+
+### Step 5 Try Image Compress
+
+Compress Image File
+
+```kotlin
+val compressedImageFile = Compressor.compress(context, actualImageFile)
+```
+
+Custom Image File
+
+```kotlin
+val compressedImageFile = Compressor.compress(context, actualImageFile) {
+    resolution(1280, 720)
+    quality(80)
+    format(Bitmap.CompressFormat.WEBP)
+    size(2_097_152) // 2 MB
+}
+```
