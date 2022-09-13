@@ -21,59 +21,66 @@ import androidx.core.net.toUri
 import com.bumptech.glide.Glide
 import id.kecilin.mediacompress.FileUtilss
 import id.kecilin.mediacompress.imagecompress.Compressor
+import id.kecilin.mediacompress.imagecompress.constraint.quality
+import id.kecilin.mediacompress.imagecompress.constraint.resolution
 import id.kecilin.mediacompress.videocompress.databinding.ActivityImageCompressBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.*
+import java.lang.Math.abs
 import java.lang.Math.log10
 import java.text.DecimalFormat
 import kotlin.math.pow
 
 class ImageCompressActivity : AppCompatActivity() {
 
-    lateinit var binding : ActivityImageCompressBinding
+    lateinit var binding: ActivityImageCompressBinding
 
-    private var dataUriOri : Uri? =null
-    private var dataUriCompress : Uri? =null
+    private var dataUriOri: Uri? = null
+    private var dataUriCompress: Uri? = null
 
-    private var sizeOri :String = ""
-    private var sizeCompress :String = ""
+    private var sizeOri: String = ""
+    private var sizeCompress: String = ""
 
-    private val registerPickImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == Activity.RESULT_OK) {
-            //mViewmodel.doSetEmptyLayout()
-            try {
-                handleResult(it.data)
+    private var sizePerOri: Long = 0
+    private var sizePerComp: Long = 0
 
-            }catch (e:Exception){
+    private val registerPickImage =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == Activity.RESULT_OK) {
+                //mViewmodel.doSetEmptyLayout()
+                try {
+                    handleResult(it.data)
+                    binding.tvCompressedSize.text = "Compressed Size: "
+                } catch (e: Exception) {
 
+                }
             }
         }
-    }
 
     /**
      * Set Path Based On Android Version
      * **/
     val path: String =
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             "${Environment.DIRECTORY_PICTURES}/Kecilin"
-        }
-        else {
+        } else {
             "${Environment.getExternalStorageDirectory()}/Kecilin"
         }
 
     private fun handleResult(data: Intent?) {
         dataUriOri = data?.data
-        val fileOri =FileUtilss.from(this,dataUriOri)
+        val fileOri = FileUtilss.from(this, dataUriOri)
 
 
         binding.btnCompress.visibility = View.VISIBLE
 
         sizeOri = getReadableFileSize(fileOri.length() ?: 0L)
 
-        binding.tvOriginalSize.text = "Original Size : ${sizeOri}"
+        binding.tvOriginalSize.text = "Original Size:\n${sizeOri}"
+        sizePerOri = fileOri.length()
 
 
         Glide.with(this@ImageCompressActivity)
@@ -83,23 +90,29 @@ class ImageCompressActivity : AppCompatActivity() {
     }
 
     private fun saveImage(fileOri: File, dataUriCompress: Uri?) {
-        if(Build.VERSION.SDK_INT >= 30){
+        if (Build.VERSION.SDK_INT >= 30) {
 
             val folderName = path ?: Environment.DIRECTORY_PICTURES
-            try{
-                saveVideoInExternal(this, videoFileName ="${System.currentTimeMillis()}-${fileOri.name}", videoFile = File(path) , folderName = folderName, uri = dataUriCompress)
+            try {
+                saveVideoInExternal(
+                    this,
+                    videoFileName = "${System.currentTimeMillis()}-${fileOri.name}",
+                    videoFile = File(path),
+                    folderName = folderName,
+                    uri = dataUriCompress
+                )
 
                 Toast.makeText(this, "Saved in /Pictures", Toast.LENGTH_SHORT).show()
-            }catch (e:Exception){
+            } catch (e: Exception) {
 
             }
 
-        }else{
+        } else {
             val directoryFolder = File(path)
 
-            if (directoryFolder.exists() && directoryFolder.isDirectory){
+            if (directoryFolder.exists() && directoryFolder.isDirectory) {
 
-            }else{
+            } else {
                 directoryFolder.mkdir()
             }
 
@@ -109,7 +122,7 @@ class ImageCompressActivity : AppCompatActivity() {
                 desFile.delete()
 
             try {
-                val inputStream =dataUriCompress?.let { contentResolver.openInputStream(it) }
+                val inputStream = dataUriCompress?.let { contentResolver.openInputStream(it) }
 
                 val inputData = getBytes(inputStream!!)
                 desFile.createNewFile()
@@ -136,24 +149,25 @@ class ImageCompressActivity : AppCompatActivity() {
 
         binding.btnCompress.setOnClickListener {
 
-            val fileOri =FileUtilss.from(this,dataUriOri)
+            val fileOri = FileUtilss.from(this, dataUriOri)
 
-            GlobalScope.launch(Dispatchers.IO){
+            GlobalScope.launch(Dispatchers.IO) {
 
-                val compressFile = Compressor.compress(this@ImageCompressActivity, fileOri)
+                val compressFile = Compressor.compress(this@ImageCompressActivity, fileOri) {
+                    resolution(1280, 720)
+                    quality(80)
+                }
 
-                dataUriCompress =compressFile?.toUri()
+                dataUriCompress = compressFile?.toUri()
                 sizeCompress = getReadableFileSize(compressFile?.length() ?: 0L)
 
-
-
                 //save
+                withContext(Dispatchers.Main) {
+                    saveImage(fileOri, dataUriCompress)
 
-
-                withContext(Dispatchers.Main){
-                    saveImage(fileOri,dataUriCompress)
-
-                    binding.tvCompressedSize.text = "Compressed Size : ${sizeCompress}"
+                    binding.tvCompressedSize.text = "Compressed Size:\n${sizeCompress}"
+                    sizePerComp = compressFile.length()
+                    binding.tvPercentage.text = getPercentage()
 
                     Glide.with(this@ImageCompressActivity)
                         .load(dataUriCompress)
@@ -162,6 +176,17 @@ class ImageCompressActivity : AppCompatActivity() {
 
             }
 
+
+        }
+    }
+
+    private fun getPercentage(): String {
+        return if (sizePerOri.toFloat() > 0) {
+            val set =
+                abs(((sizePerOri.toFloat() - sizePerComp.toFloat())) / sizePerOri.toFloat()) * 100
+            "Percentage of Compression: " + String.format("%.0f", set) + "%"
+        } else {
+            "Percentage of Compression: 0%"
         }
     }
 
@@ -198,10 +223,10 @@ class ImageCompressActivity : AppCompatActivity() {
         videoFileName: String,
         folderName: String,
         videoFile: File,
-        uri:Uri?
+        uri: Uri?
     ): File? {
 
-        val parcelFileDescriptor = uri?.let { contentResolver.openFileDescriptor(it,"r") }
+        val parcelFileDescriptor = uri?.let { contentResolver.openFileDescriptor(it, "r") }
         val fileDescriptor = parcelFileDescriptor?.fileDescriptor
 
 
@@ -217,20 +242,20 @@ class ImageCompressActivity : AppCompatActivity() {
         }
 
 
-        val collection = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY) ?: MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        val collection = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+            ?: MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 
 
-        contentResolver.insert(collection,values)?.also { uri ->
+        contentResolver.insert(collection, values)?.also { uri ->
             contentResolver.openOutputStream(uri).use { outputStream ->
 
-                val  inputStream =FileInputStream(fileDescriptor)
+                val inputStream = FileInputStream(fileDescriptor)
                 outputStream?.write(inputStream.readBytes())
             }
         }
 
         return null
     }
-
 
 
     @Suppress("DEPRECATION")
