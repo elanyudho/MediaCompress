@@ -5,8 +5,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -15,7 +13,6 @@ import android.provider.MediaStore
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import com.bumptech.glide.Glide
@@ -63,12 +60,13 @@ class ImageCompressActivity : AppCompatActivity() {
     /**
      * Set Path Based On Android Version
      * **/
-    val path: String =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            "${Environment.DIRECTORY_PICTURES}/Kecilin"
-        } else {
-            "${Environment.getExternalStorageDirectory()}/Kecilin"
-        }
+    val path: String
+        get() =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                "${Environment.DIRECTORY_PICTURES}/Kecilin"
+            } else {
+                "${Environment.getExternalStorageDirectory()}/Kecilin"
+            }
 
     private fun handleResult(data: Intent?) {
         dataUriOri = data?.data
@@ -110,10 +108,8 @@ class ImageCompressActivity : AppCompatActivity() {
         } else {
             val directoryFolder = File(path)
 
-            if (directoryFolder.exists() && directoryFolder.isDirectory) {
-
-            } else {
-                directoryFolder.mkdir()
+            if (!directoryFolder.exists() && !directoryFolder.isDirectory) {
+                directoryFolder.mkdirs()
             }
 
             val desFile = File(path, "${System.currentTimeMillis()}-${fileOri.name}")
@@ -130,7 +126,7 @@ class ImageCompressActivity : AppCompatActivity() {
                 fos.write(inputData)
                 fos.close()
 
-                Toast.makeText(this, "Saved in /Pictures/Kecilin", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Saved in /Kecilin", Toast.LENGTH_SHORT).show()
             } catch (e: IOException) {
                 e.printStackTrace()
             }
